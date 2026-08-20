@@ -84,7 +84,7 @@ HyperKvasir-Multitask/
 │   │   ├── encoder_selection.py        # Encoder evaluation/selection experiments
 │   │   ├── hierarchical_classifier.py  # Coarse hierarchical classifier training
 │   │   ├── specialists.py              # Specialist classifiers for merged class groups
-│   │   ├── siglip-cls-two-stage.ipynb  # Classification experiments and development notebook
+│   │   ├── siglip-cls-two-stage.ipynb  # Complete hierarchical classification workflow executed on Kaggle
 │   │   └── results/                    # Classification experiment outputs
 │   │
 │   ├── segmentation/                   # Polyp segmentation training pipeline
@@ -93,15 +93,15 @@ HyperKvasir-Multitask/
 │   │   ├── model.py                    # Segmentation model/decoder definition
 │   │   ├── train.py                    # Segmentation training loop
 │   │   ├── inference.py                # Segmentation evaluation/inference utilities
-│   │   ├── dino-siglip2-segmentation.ipynb
+│   │   ├── dino-siglip2-segmentation.ipynb     # Complete segmentation training workflow executed on Kaggle
 │   │   └── results/                    # Segmentation experiment outputs
 │   │
 │   └── train_dino_style_siglip2/       # DINO-style SigLIP2 adaptation
-│       ├── config.py                    # Encoder adaptation configuration
+│       ├── config.py                   # Encoder adaptation configuration
 │       ├── data.py                     # Training data pipeline
 │       ├── model.py                    # Teacher/student model definitions
 │       ├── train.py                    # DINO-style adaptation training
-│       ├── dinov2-style-siglip.ipynb   # Encoder adaptation experiments
+│       ├── dinov2-style-siglip.ipynb   # Complete DINO-style encoder adaptation workflow executed on Kaggle
 │       └── results/                    # Encoder training outputs
 │
 ├── app.py                              # Gradio web interface
@@ -210,13 +210,23 @@ The assistant returns structured output containing the generated answer, optiona
 
 ## Training
 
-Training code is provided under `training src/` and is separated from the inference pipeline.
+The training pipeline consists of three stages, corresponding to the three trained components used by the Endoscopy Vision Module:
 
-It contains the training workflows for:
+1. **DINO-style SigLIP2 adaptation** — adapts the shared SigLIP2 visual encoder to endoscopic imagery.
+2. **Hierarchical classification** — trains the coarse classifier and specialist classifiers using representations from the adapted encoder.
+3. **Polyp segmentation** — trains the segmentation decoder using spatial features from the adapted encoder.
 
-- DINO-style SigLIP2 adaptation
-- hierarchical endoscopy classification
-- polyp segmentation
+The resulting checkpoints are used by the runtime pipeline as the adapted visual encoder, hierarchical classifier, and segmentation decoder, respectively.
 
-The runtime application only depends on the models under `src/`.
+### Training Notebooks and Reproducibility
 
+Each training directory contains a complete Jupyter notebook representing the workflow used to train and evaluate that component. These notebooks were executed on **Kaggle**, where saved notebook versions preserve the corresponding code and execution outputs.
+
+
+| Component | Training Notebook | Kaggle Run |
+| --- | --- | --- |
+| DINO-style SigLIP2 adaptation | `train_dino_style_siglip2/dinov2-style-siglip.ipynb` | [View on Kaggle]("https://www.kaggle.com/code/lilyii70/dinov2-style-siglip") |
+| Hierarchical classification | `classification/siglip-cls-two-stage.ipynb` | [View on Kaggle]("https://www.kaggle.com/code/lilyii70/siglip-cls-two-stage/output") |
+| Polyp segmentation | `segmentation/dino-siglip2-segmentation.ipynb` | [View on Kaggle]("https://www.kaggle.com/code/lilyii70/dino-siglip2-segmentation-py") |
+
+The Kaggle notebook versions provide the executed training runs and their saved outputs, while the trained checkpoints used by the application are hosted separately on Hugging Face.
