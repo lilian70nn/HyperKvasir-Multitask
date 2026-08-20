@@ -9,7 +9,7 @@ from transformers import AutoImageProcessor, AutoModelForImageClassification
 
 
 class MLPHead(nn.Module):
-    def __init__(self, input_dim: int, hidden_dim: int, num_classes: int, dropout: float = 0.25):
+    def __init__(self, input_dim, hidden_dim, num_classes, dropout = 0.25):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
@@ -19,7 +19,7 @@ class MLPHead(nn.Module):
             nn.Linear(hidden_dim, num_classes),
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x):
         return self.net(x)
 
 
@@ -39,7 +39,7 @@ class HierarchicalClassifier:
     The shared SigLIP2 encoder is supplied externally and is not loaded here.
     """
 
-    def __init__(self, encoder: nn.Module, processor: Any, checkpoint_path: str | Path, device: str | torch.device | None = None):
+    def __init__(self, encoder, processor, checkpoint_path, device):
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         self.encoder = encoder
         self.processor = processor
@@ -55,12 +55,12 @@ class HierarchicalClassifier:
         self._load_hierarchy()
         self._load_specialists()
 
-    def _load_scaler(self) -> None:
+    def _load_scaler(self):
         scaler_info = self.ckpt["scaler"]
         self.scaler_mean = torch.as_tensor(scaler_info["mean"], dtype=torch.float32, device=self.device)
         self.scaler_scale = torch.as_tensor(scaler_info["scale"], dtype=torch.float32, device=self.device)
 
-    def _load_coarse_head(self) -> None:
+    def _load_coarse_head(self):
         info = self.ckpt["coarse_head"]
         self.coarse_classes = [str(x) for x in info["classes"]]
 
@@ -77,13 +77,13 @@ class HierarchicalClassifier:
         for parameter in self.coarse_head.parameters():
             parameter.requires_grad = False
 
-    def _load_hierarchy(self) -> None:
+    def _load_hierarchy(self):
         hierarchy = self.ckpt["hierarchy"]
         self.leaf_classes = [str(x) for x in hierarchy["leaf_classes"]]
         self.leaf_to_coarse = {str(k): str(v) for k, v in hierarchy["leaf_to_coarse"].items()}
         self.merge_groups = [[str(x) for x in group] for group in hierarchy["merge_groups"]]
 
-    def _load_specialists(self) -> None:
+    def _load_specialists(self):
         self.specialist_models = nn.ModuleDict()
         self.specialist_processors: dict[str, Any] = {}
         self.specialist_classes: dict[str, list[str]] = {}
@@ -121,7 +121,7 @@ class HierarchicalClassifier:
             self.merge_to_module_key[merge_label] = module_key
 
     @torch.no_grad()
-    def extract_embedding(self, image: Image.Image) -> torch.Tensor:
+    def extract_embedding(self, image):
         inputs = self.processor(images=image, return_tensors="pt")
         inputs = {key: value.to(self.device) if torch.is_tensor(value) else value for key, value in inputs.items()}
 
@@ -137,7 +137,7 @@ class HierarchicalClassifier:
         return embedding
 
     @torch.no_grad()
-    def predict_coarse(self, image: Image.Image) -> dict[str, Any]:
+    def predict_coarse(self, image):
         embedding = self.extract_embedding(image)
         logits = self.coarse_head(embedding)
         probabilities = F.softmax(logits, dim=1)[0]
@@ -149,7 +149,7 @@ class HierarchicalClassifier:
         return {"label": pred_label, "confidence": confidence}
 
     @torch.no_grad()
-    def predict_specialist(self, image: Image.Image, merge_label: str) -> dict[str, Any]:
+    def predict_specialist(self, image, merge_label):
         if merge_label not in self.merge_to_module_key:
             raise KeyError(f"No specialist found for merge group: {merge_label}")
 
@@ -171,7 +171,7 @@ class HierarchicalClassifier:
         return {"label": pred_label, "confidence": confidence}
 
     @torch.no_grad()
-    def predict(self, image: Image.Image) -> dict[str, Any]:
+    def predict(self, image):
         if not isinstance(image, Image.Image):
             raise TypeError("HierarchicalClassifier.predict expects a PIL.Image.Image.")
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +25,7 @@ class ConvNormAct(nn.Module):
 
 
 class SegmentationDecoder(nn.Module):
-    def __init__(self, hidden_dim: int, decoder_channels: int = 256, dropout: float = 0.10):
+    def __init__(self, hidden_dim, decoder_channels, dropout = 0.10):
         super().__init__()
 
         self.projection = nn.Sequential(
@@ -44,7 +42,7 @@ class SegmentationDecoder(nn.Module):
         self.dropout = nn.Dropout2d(dropout)
         self.head = nn.Conv2d(32, 1, kernel_size=1)
 
-    def forward(self, feature_map: torch.Tensor, output_size: tuple[int, int]) -> torch.Tensor:
+    def forward(self, feature_map, output_size):
         x = self.projection(feature_map)
 
         x = F.interpolate(x, scale_factor=2, mode="bilinear", align_corners=False)
@@ -107,7 +105,7 @@ class PolypSegmentor:
 
         self._load_decoder()
 
-    def _get_hidden_dim(self) -> int:
+    def _get_hidden_dim(self):
         if hasattr(self.encoder.config, "vision_config"):
             return int(self.encoder.config.vision_config.hidden_size)
 
@@ -116,7 +114,7 @@ class PolypSegmentor:
 
         raise RuntimeError("Could not determine SigLIP2 vision hidden dimension.")
 
-    def _load_decoder(self) -> None:
+    def _load_decoder(self):
         hidden_dim = self._get_hidden_dim()
         decoder_channels = int(self.ckpt.get("decoder_channels", 256))
         dropout = float(self.ckpt.get("dropout", 0.10))
@@ -133,7 +131,7 @@ class PolypSegmentor:
         for parameter in self.decoder.parameters():
             parameter.requires_grad = False
 
-    def tokens_to_feature_map(self, tokens: torch.Tensor) -> torch.Tensor:
+    def tokens_to_feature_map(self, tokens):
         batch_size, token_count, hidden_dim = tokens.shape
 
         expected_grid = self.image_size // self.patch_size
@@ -158,7 +156,7 @@ class PolypSegmentor:
         return patch_tokens.transpose(1, 2).reshape(batch_size, hidden_dim, grid_size, grid_size)
 
     @torch.no_grad()
-    def extract_feature_map(self, image: Image.Image) -> torch.Tensor:
+    def extract_feature_map(self, image):
         resized = TF.resize(
             image,
             [self.image_size, self.image_size],
@@ -179,7 +177,7 @@ class PolypSegmentor:
         return self.tokens_to_feature_map(tokens)
 
     @torch.no_grad()
-    def predict(self, image: str | Path | Image.Image, threshold: float | None = None) -> dict[str, Any]:
+    def predict(self, image, threshold):
         if isinstance(image, (str, Path)):
             with Image.open(image) as img:
                 image = img.convert("RGB")
@@ -219,7 +217,7 @@ class PolypSegmentor:
         }
 
     @torch.no_grad()
-    def predict_contour(self, image: str | Path | Image.Image, threshold: float | None = None) -> dict[str, Any]:
+    def predict_contour(self, image, threshold):
         if isinstance(image, (str, Path)):
             with Image.open(image) as img:
                 pil_image = img.convert("RGB")
@@ -239,5 +237,5 @@ class PolypSegmentor:
             "threshold": result["threshold"],
         }
 
-    def __call__(self, image: str | Path | Image.Image, threshold: float | None = None) -> dict[str, Any]:
+    def __call__(self, image, threshold):
         return self.predict(image, threshold=threshold)

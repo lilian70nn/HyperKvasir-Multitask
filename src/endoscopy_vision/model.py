@@ -9,7 +9,7 @@ from PIL import Image
 from huggingface_hub import hf_hub_download
 from transformers import AutoModel, AutoProcessor
 
-from .classification import TwoStageClassifier
+from .classification import HierarchicalClassifier
 from .segmentation import PolypSegmentor
 from .config import HF_REPO_ID, ENCODER_FILENAME, CLASSIFIER_FILENAME, SEGMENTATION_FILENAME, SIGLIP_MODEL_NAME, ENCODER_STATE_KEY, POLYP_LABEL
 
@@ -19,12 +19,12 @@ class EndoscopyVisionModule:
 
     def __init__(
         self,
-        encoder_checkpoint: str | Path,
-        classifier_checkpoint: str | Path,
-        segmentation_checkpoint: str | Path,
-        model_name: str = SIGLIP_MODEL_NAME,
-        encoder_state_key: str = ENCODER_STATE_KEY,
-        device: str | torch.device | None = None,
+        encoder_checkpoint,
+        classifier_checkpoint,
+        segmentation_checkpoint,
+        model_name = SIGLIP_MODEL_NAME,
+        encoder_state_key = ENCODER_STATE_KEY,
+        device = None,
     ):
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
 
@@ -46,21 +46,21 @@ class EndoscopyVisionModule:
 
         self.processor, self.encoder = self._load_shared_encoder()
 
-        self.classifier = TwoStageClassifier(
+        self.classifier = HierarchicalClassifier(
             encoder=self.encoder,
             processor=self.processor,
-            classifier_checkpoint=self.classifier_checkpoint,
+            checkpoint_path=self.classifier_checkpoint,
             device=self.device,
         )
 
         self.segmentor = PolypSegmentor(
             encoder=self.encoder,
             processor=self.processor,
-            segmentation_checkpoint=self.segmentation_checkpoint,
+            checkpoint_path=self.segmentation_checkpoint,
             device=self.device,
         )
 
-    def _load_shared_encoder(self) -> tuple[Any, torch.nn.Module]:
+    def _load_shared_encoder(self):
         processor = AutoProcessor.from_pretrained(self.model_name, trust_remote_code=True)
 
         encoder = AutoModel.from_pretrained(
@@ -102,7 +102,7 @@ class EndoscopyVisionModule:
         return processor, encoder
 
     @staticmethod
-    def _prepare_image(image: str | Path | Image.Image | np.ndarray) -> Image.Image:
+    def _prepare_image(image):
         if isinstance(image, (str, Path)):
             with Image.open(image) as img:
                 return img.convert("RGB")
@@ -116,25 +116,17 @@ class EndoscopyVisionModule:
         raise TypeError("image must be a path, PIL.Image.Image, or numpy.ndarray")
 
     @torch.no_grad()
-    def predict_classification(self, image: str | Path | Image.Image | np.ndarray) -> dict[str, Any]:
+    def predict_classification(self, image):
         image = self._prepare_image(image)
         return self.classifier.predict(image)
 
     @torch.no_grad()
-    def predict_segmentation(
-        self,
-        image: str | Path | Image.Image | np.ndarray,
-        threshold: float | None = None,
-    ) -> dict[str, Any]:
+    def predict_segmentation(self, image, threshold):
         image = self._prepare_image(image)
         return self.segmentor.predict(image, threshold=threshold)
 
     @torch.no_grad()
-    def predict(
-        self,
-        image: str | Path | Image.Image | np.ndarray,
-        segmentation_threshold: float | None = None,
-    ) -> dict[str, Any]:
+    def predict(self, image, segmentation_threshold = None):
         image = self._prepare_image(image)
 
         classification = self.classifier.predict(image)
@@ -154,11 +146,7 @@ class EndoscopyVisionModule:
 
         return result
 
-    def __call__(
-        self,
-        image: str | Path | Image.Image | np.ndarray,
-        segmentation_threshold: float | None = None,
-    ) -> dict[str, Any]:
+    def __call__(self, image, segmentation_threshold = None):
         return self.predict(
             image=image,
             segmentation_threshold=segmentation_threshold,
@@ -166,11 +154,11 @@ class EndoscopyVisionModule:
 
 
 def load_model(
-    encoder_checkpoint: str | Path | None = None,
-    classifier_checkpoint: str | Path | None = None,
-    segmentation_checkpoint: str | Path | None = None,
-    device: str | torch.device | None = None,
-) -> EndoscopyVisionModule:
+    encoder_checkpoint = None,
+    classifier_checkpoint = None,
+    segmentation_checkpoint = None,
+    device = None,
+):
     if encoder_checkpoint is None:
         encoder_checkpoint = hf_hub_download(
             repo_id=HF_REPO_ID,
