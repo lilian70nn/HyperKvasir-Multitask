@@ -1,0 +1,4 @@
+merge_group_id,merge_label,num_classes,classes
+1,__MERGE__esophagitis-a__esophagitis-b-d__z-line,3,"[""esophagitis-a"", ""esophagitis-b-d"", ""z-line""]"
+2,__MERGE__ulcerative-colitis-grade-1__ulcerative-colitis-grade-2,2,"[""ulcerative-colitis-grade-1"", ""ulcerative-colitis-grade-2""]"
+3,__MERGE__dyed-lifted-polyps__dyed-resection-margins,2,"[""dyed-lifted-polyps"", ""dyed-resection-margins""]"

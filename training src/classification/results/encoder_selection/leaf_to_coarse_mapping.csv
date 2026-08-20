@@ -1,0 +1,17 @@
+leaf_label,coarse_label,is_merged
+bbps-0-1,bbps-0-1,False
+bbps-2-3,bbps-2-3,False
+cecum,cecum,False
+dyed-lifted-polyps,__MERGE__dyed-lifted-polyps__dyed-resection-margins,True
+dyed-resection-margins,__MERGE__dyed-lifted-polyps__dyed-resection-margins,True
+esophagitis-a,__MERGE__esophagitis-a__esophagitis-b-d__z-line,True
+esophagitis-b-d,__MERGE__esophagitis-a__esophagitis-b-d__z-line,True
+impacted-stool,impacted-stool,False
+polyps,polyps,False
+pylorus,pylorus,False
+retroflex-rectum,retroflex-rectum,False
+retroflex-stomach,retroflex-stomach,False
+ulcerative-colitis-grade-1,__MERGE__ulcerative-colitis-grade-1__ulcerative-colitis-grade-2,True
+ulcerative-colitis-grade-2,__MERGE__ulcerative-colitis-grade-1__ulcerative-colitis-grade-2,True
+ulcerative-colitis-grade-3,ulcerative-colitis-grade-3,False
+z-line,__MERGE__esophagitis-a__esophagitis-b-d__z-line,True

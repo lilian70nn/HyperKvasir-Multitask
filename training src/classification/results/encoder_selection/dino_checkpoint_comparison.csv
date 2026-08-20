@@ -1,0 +1,7 @@
+checkpoint,checkpoint_name,dino_epoch,ssl_train_loss,probe_best_epoch,probe_val_macro_f1
+/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch2.pt,siglip2_dino_style_epoch2.pt,2,1.1143755956726233,3,0.8612226293216791
+/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch3.pt,siglip2_dino_style_epoch3.pt,3,0.9278197700525973,3,0.8594753822404423
+/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch4.pt,siglip2_dino_style_epoch4.pt,4,0.8099745393557389,3,0.8593796669518984
+/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch1.pt,siglip2_dino_style_epoch1.pt,1,5.27625254562265,3,0.8564605785917054
+/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch5.pt,siglip2_dino_style_epoch5.pt,5,0.7260170011983252,9,0.855477643884945
+,original_siglip2_epoch0,0,,7,0.8391438798642963
