@@ -225,8 +225,8 @@ Each training directory contains a complete Jupyter notebook representing the wo
 
 | Component | Training Notebook | Kaggle Run |
 | --- | --- | --- |
-| DINO-style SigLIP2 adaptation | `train_dino_style_siglip2/dinov2-style-siglip.ipynb` | [View on Kaggle]("https://www.kaggle.com/code/lilyii70/dinov2-style-siglip") |
-| Hierarchical classification | `classification/siglip-cls-two-stage.ipynb` | [View on Kaggle]("https://www.kaggle.com/code/lilyii70/siglip-cls-two-stage/output") |
-| Polyp segmentation | `segmentation/dino-siglip2-segmentation.ipynb` | [View on Kaggle]("https://www.kaggle.com/code/lilyii70/dino-siglip2-segmentation-py") |
+| DINO-style SigLIP2 adaptation | `train_dino_style_siglip2/dinov2-style-siglip.ipynb` | [View on Kaggle](https://www.kaggle.com/code/lilyii70/dinov2-style-siglip) |
+| Hierarchical classification | `classification/siglip-cls-two-stage.ipynb` | [View on Kaggle](https://www.kaggle.com/code/lilyii70/siglip-cls-two-stage/output) |
+| Polyp segmentation | `segmentation/dino-siglip2-segmentation.ipynb` | [View on Kaggle](https://www.kaggle.com/code/lilyii70/dino-siglip2-segmentation-py) |
 
 The Kaggle notebook versions provide the executed training runs and their saved outputs, while the trained checkpoints used by the application are hosted separately on Hugging Face.
