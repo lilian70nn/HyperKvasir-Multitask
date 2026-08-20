@@ -29,21 +29,21 @@ from common import (
     save_eval_outputs
 )
 
-FINE_DIR = OUTPUT_DIR / "specialists"
+SPECIALIST_DIR = OUTPUT_DIR / "specialists"
 
 SPECIALIST_BACKBONES = [
     {"tag": "swin_tiny", "hf_model_name": "microsoft/swin-tiny-patch4-window7-224"},
 ]
 
-FINE_BATCH_SIZE = 16
-FINE_EPOCHS = 20
-FINE_LR = 2e-5
-FINE_WEIGHT_DECAY = 1e-4
-FINE_PATIENCE = 6
+SPECIALIST_BATCH_SIZE = 16
+SPECIALIST_EPOCHS = 20
+SPECIALIST_LR = 2e-5
+SPECIALIST_WEIGHT_DECAY = 1e-4
+SPECIALIST_PATIENCE = 6
 
-USE_FINE_AUGMENTATION = True
+USE_SPECIALIST_AUGMENTATION = True
 
-fine_train_transform = transforms.Compose([
+specialist_train_transform = transforms.Compose([
     transforms.RandomResizedCrop(224, scale=(0.80, 1.00)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomRotation(degrees=10),
@@ -54,7 +54,7 @@ fine_train_transform = transforms.Compose([
 
 # Specialist dataset
 
-class FineImageDataset(Dataset):
+class SpecialistImageDataset(Dataset):
     def __init__(self, paths, labels, image_processor, label_encoder, transform=None):
         self.paths = [str(p) for p in paths]
         self.labels = [str(x) for x in labels]
@@ -85,7 +85,7 @@ class FineImageDataset(Dataset):
 # Specialist inference
 
 @torch.no_grad()
-def predict_specialist_paths(model, image_processor, label_encoder, paths, batch_size=FINE_BATCH_SIZE):
+def predict_specialist_paths(model, image_processor, label_encoder, paths, batch_size=SPECIALIST_BATCH_SIZE):
     model.eval()
     all_probs = []
 
@@ -112,19 +112,19 @@ def predict_specialist_paths(model, image_processor, label_encoder, paths, batch
 # Train one specialist
 
 def train_specialist(group_id, merge_label, group_classes, train_df, val_df, backbone_tag, hf_model_name):
-    group_dir = FINE_DIR / f"group_{group_id:02d}" / backbone_tag
+    group_dir = SPECIALIST_DIR / f"group_{group_id:02d}" / backbone_tag
     group_dir.mkdir(parents=True, exist_ok=True)
 
-    fine_train_df = train_df[train_df["cls_label"].isin(group_classes)].copy().reset_index(drop=True)
-    fine_val_df = val_df[val_df["cls_label"].isin(group_classes)].copy().reset_index(drop=True)
+    specialist_train_df = train_df[train_df["cls_label"].isin(group_classes)].copy().reset_index(drop=True)
+    specialist_val_df = val_df[val_df["cls_label"].isin(group_classes)].copy().reset_index(drop=True)
 
-    if len(fine_train_df) == 0 or len(fine_val_df) == 0:
+    if len(specialist_train_df) == 0 or len(specialist_val_df) == 0:
         raise ValueError(f"Empty specialist train/val split for group {group_id}")
 
-    y_train = fine_train_df["cls_label"].astype(str).values
-    y_val = fine_val_df["cls_label"].astype(str).values
-    train_paths = fine_train_df["image_path"].astype(str).values
-    val_paths = fine_val_df["image_path"].astype(str).values
+    y_train = specialist_train_df["cls_label"].astype(str).values
+    y_val = specialist_val_df["cls_label"].astype(str).values
+    train_paths = specialist_train_df["image_path"].astype(str).values
+    val_paths = specialist_val_df["image_path"].astype(str).values
 
     label_encoder = LabelEncoder()
     label_encoder.fit(y_train)
@@ -143,17 +143,17 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
         ignore_mismatched_sizes=True,
     ).to(DEVICE)
 
-    train_ds = FineImageDataset(
+    train_ds = SpecialistImageDataset(
         paths=train_paths,
         labels=y_train,
         image_processor=image_processor,
         label_encoder=label_encoder,
-        transform=fine_train_transform if USE_FINE_AUGMENTATION else None,
+        transform=specialist_train_transform if USE_SPECIALIST_AUGMENTATION else None,
     )
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=FINE_BATCH_SIZE,
+        batch_size=SPECIALIST_BATCH_SIZE,
         shuffle=True,
         drop_last=False,
         num_workers=NUM_WORKERS,
@@ -168,7 +168,7 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
     else:
         criterion = nn.CrossEntropyLoss()
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=FINE_LR, weight_decay=FINE_WEIGHT_DECAY)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=SPECIALIST_LR, weight_decay=SPECIALIST_WEIGHT_DECAY)
 
     best_state = None
     best_epoch = -1
@@ -180,10 +180,10 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
     print("Training specialist:", merge_label)
     print("Classes:", group_classes)
     print("Backbone:", hf_model_name)
-    print("Train:", len(fine_train_df), "| Val:", len(fine_val_df))
+    print("Train:", len(specialist_train_df), "| Val:", len(specialist_val_df))
     print("=" * 100)
 
-    for epoch in range(1, FINE_EPOCHS + 1):
+    for epoch in range(1, SPECIALIST_EPOCHS + 1):
         model.train()
         losses = []
 
@@ -199,7 +199,7 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
 
             losses.append(float(loss.item()))
 
-        pred, conf, probs = predict_fine_paths(model, image_processor, label_encoder, val_paths)
+        pred, conf, probs = predict_specialist_paths(model, image_processor, label_encoder, val_paths)
         metrics = compute_metrics(y_val, pred)
 
         history.append({
@@ -223,16 +223,16 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
         else:
             patience += 1
 
-        if patience >= FINE_PATIENCE:
+        if patience >= SPECIALIST_PATIENCE:
             print(f"Specialist early stopping | best_epoch={best_epoch} | best_macro_f1={best_macro_f1:.4f}")
             break
 
     model.load_state_dict(best_state)
     model.eval()
 
-    pred, conf, probs = predict_fine_paths(model, image_processor, label_encoder, val_paths)
+    pred, conf, probs = predict_specialist_paths(model, image_processor, label_encoder, val_paths)
 
-    eval_obj = save_eval_outputs(
+    specialist_eval = save_eval_outputs(
         out_dir=group_dir,
         y_true=y_val,
         y_pred=pred,
@@ -264,12 +264,12 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
         "group_classes": json.dumps(group_classes),
         "backbone_tag": backbone_tag,
         "hf_model_name": hf_model_name,
-        "train_n": len(fine_train_df),
-        "val_n": len(fine_val_df),
+        "train_n": len(specialist_train_df),
+        "val_n": len(specialist_val_df),
         "best_epoch": best_epoch,
-        "val_accuracy": eval_obj["metrics"]["accuracy"],
-        "val_balanced_accuracy": eval_obj["metrics"]["balanced_accuracy"],
-        "val_f1_macro": eval_obj["metrics"]["f1_macro"],
+        "val_accuracy": specialist_eval["metrics"]["accuracy"],
+        "val_balanced_accuracy": specialist_eval["metrics"]["balanced_accuracy"],
+        "val_f1_macro": specialist_eval["metrics"]["f1_macro"],
         "checkpoint_path": str(checkpoint_path),
     }
 
@@ -286,7 +286,7 @@ def train_specialist(group_id, merge_label, group_classes, train_df, val_df, bac
     }
 
 
-# Load specialist for final routing
+# Load specialist for hierarchical routing
 
 def load_specialist(checkpoint_path):
     ckpt = torch.load(checkpoint_path, map_location="cpu", weights_only=False)

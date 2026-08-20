@@ -153,7 +153,7 @@ class EndoscopyVisionModule:
         )
 
 
-def load_model(
+def load_endoscopy_model(
     encoder_checkpoint = None,
     classifier_checkpoint = None,
     segmentation_checkpoint = None,
