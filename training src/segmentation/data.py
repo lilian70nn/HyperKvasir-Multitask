@@ -12,7 +12,7 @@ from .config import *
 
 
 
-def set_seed(seed=42):
+def set_seed(seed=RANDOM_STATE):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from torchvision.transforms import functional as TF
 from torchvision.transforms import InterpolationMode
-from transformers import AutoProcessor
 
 from .config import IMAGE_SIZE, MASK_THRESHOLD, DEVICE
 from .model import FrozenDinoSigLIP2SegmentationModel

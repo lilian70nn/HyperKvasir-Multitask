@@ -34,53 +34,9 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import confusion_matrix
 from IPython.display import display
 
-from common import (
-    DEVICE,
-    RANDOM_STATE,
-    NUM_WORKERS,
-    EMBED_BATCH_SIZE,
-    MLP_HIDDEN_DIM,
-    MLP_DROPOUT,
-    MLP_BATCH_SIZE,
-    MLP_EPOCHS,
-    MLP_LR,
-    MLP_WEIGHT_DECAY,
-    MLP_PATIENCE,
-    USE_CLASS_WEIGHT,
-    set_seed,
-    make_class_weights,
-    compute_metrics,
-    SigLIPImageDataset,
-    siglip_collate_fn,
-    load_adapted_siglip_encoder,
-    MLPHead,
-    predict_mlp,
-    make_merge_label
-)
+from .config import *
+from .common import *
 
-DATA_ROOT = Path("/kaggle/input/datasets/kelkalot/the-hyper-kvasir-dataset")
-LABELED_ROOT = DATA_ROOT / "labeled-images"
-LABEL_CSV = LABELED_ROOT / "image-labels.csv"
-
-OUTPUT_DIR = Path("/kaggle/working/two_stage_leaf_mlp_coarse_swin_aug")
-ENCODER_SELECTION_DIR = OUTPUT_DIR / "encoder_selection"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-ENCODER_SELECTION_DIR.mkdir(parents=True, exist_ok=True)
-
-DINO_CHECKPOINTS = [
-    None,  # epoch 0: original pretrained SigLIP2, no DINO checkpoint
-    Path("/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch1.pt"),
-    Path("/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch2.pt"),
-    Path("/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch3.pt"),
-    Path("/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch4.pt"),
-    Path("/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch5.pt"),
-]
-
-IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-TRAIN_RATIO = 0.80
-
-MIN_CLASS_COUNT = 100
-MERGE_THRESHOLD = 15
 
 def clean_text(x):
     x = str(x).strip().lower()

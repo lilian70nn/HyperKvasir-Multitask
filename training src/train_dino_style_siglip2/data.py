@@ -5,10 +5,11 @@ from tqdm import tqdm
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
+from .config import RANDOM_STATE
 
 
 # Seed
-def set_seed(seed=42):
+def set_seed(seed=RANDOM_STATE):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

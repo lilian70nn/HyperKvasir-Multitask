@@ -19,29 +19,9 @@ from transformers import (
 )
 from sklearn.preprocessing import LabelEncoder
 
-from common import (
-    DEVICE,
-    NUM_WORKERS,
-    USE_CLASS_WEIGHT,
-    OUTPUT_DIR,
-    make_class_weights,
-    compute_metrics,
-    save_eval_outputs
-)
+from .config import *
+from .common import *
 
-SPECIALIST_DIR = OUTPUT_DIR / "specialists"
-
-SPECIALIST_BACKBONES = [
-    {"tag": "swin_tiny", "hf_model_name": "microsoft/swin-tiny-patch4-window7-224"},
-]
-
-SPECIALIST_BATCH_SIZE = 16
-SPECIALIST_EPOCHS = 20
-SPECIALIST_LR = 2e-5
-SPECIALIST_WEIGHT_DECAY = 1e-4
-SPECIALIST_PATIENCE = 6
-
-USE_SPECIALIST_AUGMENTATION = True
 
 specialist_train_transform = transforms.Compose([
     transforms.RandomResizedCrop(224, scale=(0.80, 1.00)),
@@ -49,7 +29,6 @@ specialist_train_transform = transforms.Compose([
     transforms.RandomRotation(degrees=10),
     transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.10, hue=0.02),
 ])
-
 
 
 # Specialist dataset

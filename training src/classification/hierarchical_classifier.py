@@ -40,64 +40,16 @@ import torch.nn.functional as F
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from IPython.display import display
 
-from specialists import (
-    SPECIALIST_BACKBONES,
+from .specialists import (
     train_specialist,
     load_specialist,
     predict_specialist_paths,
 )
 
-from common import (
-    OUTPUT_DIR,
-    SIGLIP_MODEL_NAME,
-    DEVICE,
-    RANDOM_STATE,
-    NUM_WORKERS,
-    EMBED_BATCH_SIZE,
-    MLP_HIDDEN_DIM,
-    MLP_DROPOUT,
-    MLP_BATCH_SIZE,
-    MLP_EPOCHS,
-    MLP_LR,
-    MLP_WEIGHT_DECAY,
-    MLP_PATIENCE,
-    USE_CLASS_WEIGHT,
-    set_seed,
-    make_class_weights,
-    compute_metrics,
-    SigLIPImageDataset,
-    siglip_collate_fn,
-    load_adapted_siglip_encoder,
-    MLPHead,
-    predict_mlp,
-    save_eval_outputs,
-    make_merge_label
-)
+from .common import *
+from .config import *
 
-from encoder_selection import ENCODER_SELECTION_DIR
 
-with open(ENCODER_SELECTION_DIR / "selection_results.json", "r") as f:
-    selection_info = json.load(f)
-
-merge_groups = selection_info["merge_groups"]
-leaf_to_coarse = selection_info["leaf_to_coarse"]
-leaf_classes = selection_info["leaf_classes"]
-
-best_dino_ckpt_path = (
-    None
-    if selection_info["best_dino_ckpt_path"] is None
-    else Path(selection_info["best_dino_ckpt_path"])
-)
-
-train_df = pd.read_csv(OUTPUT_DIR / "global_train_df.csv")
-val_df = pd.read_csv(OUTPUT_DIR / "global_val_df.csv")
-
-COARSE_DIR = OUTPUT_DIR / "coarse_classifier"
-SPECIALIST_DIR = OUTPUT_DIR / "specialists"
-HIERARCHICAL_DIR = OUTPUT_DIR / "hierarchical_classifier"
-
-for d in [COARSE_DIR, SPECIALIST_DIR, HIERARCHICAL_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
 
 def copy_wrong_images(wrong_df, out_dir, max_per_pair=80):
     out_dir = Path(out_dir)
@@ -287,6 +239,24 @@ def train_coarse_classifier(X_train_s, y_train, X_val_s, y_val):
 
 
 def run_hierarchical_pipeline():
+
+    with open(ENCODER_SELECTION_DIR / "selection_results.json", "r") as f:
+        selection_info = json.load(f)
+
+    merge_groups = selection_info["merge_groups"]
+    leaf_to_coarse = selection_info["leaf_to_coarse"]
+    leaf_classes = selection_info["leaf_classes"]
+
+    best_dino_ckpt_path = (
+        None
+        if selection_info["best_dino_ckpt_path"] is None
+        else Path(selection_info["best_dino_ckpt_path"])
+    )
+
+    train_df = pd.read_csv(OUTPUT_DIR / "global_train_df.csv")
+    val_df = pd.read_csv(OUTPUT_DIR / "global_val_df.csv")
+
+
     print("\n" + "=" * 100)
     print("HIERARCHICAL CLASSIFIER TRAINING")
     print("=" * 100)

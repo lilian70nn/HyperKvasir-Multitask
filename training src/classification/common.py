@@ -8,9 +8,8 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, TensorDataset
+from torch.utils.data import Dataset
 from transformers import AutoProcessor, AutoModel
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
@@ -21,25 +20,7 @@ from sklearn.metrics import (
     classification_report
 )
 
-
-
-SIGLIP_MODEL_NAME = "google/siglip2-base-patch16-224"
-
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-RANDOM_STATE = 42
-NUM_WORKERS = 2
-EMBED_BATCH_SIZE = 128
-
-MLP_HIDDEN_DIM = 256
-MLP_DROPOUT = 0.25
-MLP_BATCH_SIZE = 128
-MLP_EPOCHS = 100
-MLP_LR = 1e-3
-MLP_WEIGHT_DECAY = 1e-4
-MLP_PATIENCE = 15
-USE_CLASS_WEIGHT = True
-
+from .config import SIGLIP_MODEL_NAME, DEVICE
 
 def set_seed(seed=42):
     random.seed(seed)

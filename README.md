@@ -79,10 +79,11 @@ HyperKvasir-Multitask/
 │
 ├── training src/                       # Model development and training pipelines
 │   │
-│   ├── classification/                 # Hierarchical endoscopy classification
-│   │   ├── common.py                   # Shared classification utilities
-│   │   ├── encoder_selection.py        # Encoder evaluation/selection experiments
-│   │   ├── hierarchical_classifier.py  # Coarse hierarchical classifier training
+│   ├── classification/                 # Hierarchical endoscopy classification pipeline
+│   │   ├── config.py                   # Classification paths, model settings, and training hyperparameters
+│   │   ├── common.py                   # Shared datasets, metrics, SigLIP embedding, MLP, and evaluation utilities
+│   │   ├── encoder_selection.py        # SigLIP2/DINO checkpoint selection and merge-group discovery
+│   │   ├── hierarchical_classifier.py  # Coarse classifier training, specialist routing, evaluation
 │   │   ├── specialists.py              # Specialist classifiers for merged class groups
 │   │   ├── siglip-cls-two-stage.ipynb  # Complete hierarchical classification workflow executed on Kaggle
 │   │   └── results/                    # Classification experiment outputs
