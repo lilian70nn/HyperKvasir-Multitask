@@ -117,9 +117,9 @@ At runtime, `src/vlm/model.py` acts as the top-level orchestration layer. It det
 
 The trained model checkpoints are hosted on Hugging Face and are downloaded automatically when the Endoscopy Vision Module is initialized.
 
-Repository:
+Checkpoint repository:
 
-`Lian70/HyperKvasir-Multitask`
+[Lian70/HyperKvasir-Multitask](https://huggingface.co/Lian70/HyperKvasir-Multitask)
 
 The specialist module uses:
 
