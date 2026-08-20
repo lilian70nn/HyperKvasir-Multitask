@@ -16,27 +16,27 @@ The specialist vision module uses a shared DINO-style adapted SigLIP2 encoder.
 
 ### Hierarchical Classification
 
-The classification pipeline is:
+The classification branch uses a two-stage hierarchy designed to separate easily distinguishable findings from groups of visually similar classes.
+
+**Stage 1 — Coarse classification.**  
+The DINO-style adapted SigLIP2 encoder extracts an L2-normalized visual embedding from the input image. After applying the saved feature standardization, an MLP classifier predicts a coarse class.
+
+**Stage 2 — Conditional specialist classification.**  
+If the coarse prediction already corresponds to a single leaf class, it becomes the final prediction directly. If the prediction corresponds to a merged group of visually similar classes, the image is routed to a dedicated Swin specialist classifier, which resolves the prediction into the final leaf class.
 
 ```text
-Image
-  ↓
-DINO-style adapted SigLIP2
-  ↓
-L2-normalized visual embedding
-  ↓
-StandardScaler
-  ↓
-Coarse MLP classifier
-  ↓
-Direct leaf prediction
-or
-Specialist Swin classifier
-  ↓
-Final class
+                         ┌── Single leaf ───────────────→ Final class
+                         │
+Image → SigLIP2 → Coarse MLP
+                         │
+                         └── Merged class group
+                                  ↓
+                           Swin specialist
+                                  ↓
+                              Final class
 ```
 
-The specialist classifiers are only activated for coarse classes that contain multiple visually similar leaf classes.
+This design keeps the shared SigLIP2 representation responsible for broad endoscopic classification while using specialist models only for ambiguous class groups that benefit from finer visual discrimination.
 
 ### Polyp Segmentation
 
@@ -210,7 +210,7 @@ The assistant returns structured output containing the generated answer, optiona
 
 ## Training
 
-The training pipeline consists of three stages, corresponding to the three trained components used by the Endoscopy Vision Module:
+The Endoscopy Vision Module is built from three trained components:
 
 1. **DINO-style SigLIP2 adaptation** — adapts the shared SigLIP2 visual encoder to endoscopic imagery.
 2. **Hierarchical classification** — trains the coarse classifier and specialist classifiers using representations from the adapted encoder.
