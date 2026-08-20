@@ -230,3 +230,9 @@ Each training directory contains a complete Jupyter notebook representing the wo
 | Polyp segmentation | `segmentation/dino-siglip2-segmentation.ipynb` | [View on Kaggle](https://www.kaggle.com/code/lilyii70/dino-siglip2-segmentation-py) |
 
 The Kaggle notebook versions provide the executed training runs and their saved outputs, while the trained checkpoints used by the application are hosted separately on Hugging Face.
+
+## References
+
+1. Dermyer, P., Kalra, A., & Schwartz, M. (2025). Endodino: A foundation model for gi endoscopy. arXiv preprint arXiv:2501.05488.
+
+2. Borgli, H., Thambawita, V., Smedsrud, P. H., Hicks, S., Jha, D., Eskeland, S. L., ... & De Lange, T. (2020). HyperKvasir, a comprehensive multi-class image and video dataset for gastrointestinal endoscopy. Scientific data, 7(1), 283.
