@@ -114,31 +114,37 @@ class EndoscopyAssistantModel:
         if image is None:
             return False
 
-        user_text = text.strip() if text else "No text was provided. Determine whether the supplied image requires specialized endoscopy analysis."
+        user_text = text.strip() if text else "Describe and analyze the supplied image."
 
         prompt = f"""
-You are the routing component of a multimodal assistant.
+    You are the routing component of a multimodal assistant.
 
-Decide whether the current request requires the specialized Endoscopy Vision Module.
+    Decide whether the specialized Endoscopy Vision Module could provide useful domain-specific evidence for answering the current request.
 
-The Endoscopy Vision Module is designed for endoscopy images. It performs gastrointestinal finding classification and, when the predicted class is polyps, polyp segmentation.
+    The Endoscopy Vision Module is designed for gastrointestinal endoscopy images. It performs finding classification and, when the predicted class is polyps, polyp segmentation.
 
-Use the specialist when:
-- the image is an endoscopy image, and
-- analyzing the endoscopic finding would help answer the user's request.
+    Use the specialist when:
+    - the supplied image appears to be an endoscopy image, and
+    - the user's request refers to, describes, identifies, interprets, captions, or analyzes the supplied image.
 
-Do not use it for unrelated images, general conversation, or questions that do not require specialized analysis of the supplied endoscopy image.
+    The user does not need to explicitly ask for a diagnosis or classification. For requests such as "what's this?", "what do you see?", "describe this image", or "caption this image", the specialist classification can still provide useful evidence for the final answer.
 
-User request:
-{user_text}
+    Do not use the specialist when:
+    - the image is clearly unrelated to endoscopy, or
+    - the user's request is unrelated to interpreting or describing the supplied image.
 
-Return exactly one word:
-YES
-or
-NO
-"""
+    User request:
+    {user_text}
+
+    Return exactly one word:
+    YES
+    or
+    NO
+    """
 
         decision = self._run_vlm(prompt, image=image, max_new_tokens=8).strip().upper()
+
+        print(f"[router] decision = {decision!r}")
 
         if decision.startswith("YES"):
             return True
@@ -147,7 +153,6 @@ NO
             return False
 
         return False
-
 
     def _evidence_text(self, result):
         classification = result.get("classification", {})
