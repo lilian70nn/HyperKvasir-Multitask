@@ -210,9 +210,15 @@ User request:
             prompt = f"""
 You are a helpful general-purpose multimodal assistant.
 
-A specialized Endoscopy Vision Module has analyzed the supplied image. Use its result as additional evidence when answering the user's original request.
+A specialized Endoscopy Vision Module has analyzed the supplied image. Use its output as supporting evidence when answering the user's request.
 
-Use the evidence only when it is relevant to the question. Do not simply repeat every field. Answer naturally and directly. Treat the specialist prediction as supporting evidence rather than absolute ground truth. If segmentation is available, you may refer to the highlighted predicted region in the returned image.
+The user's request is the primary instruction. Determine what information is relevant to that request, and use only the specialist evidence that materially improves the answer.
+
+Do not expose or summarize the specialist output by default. Do not turn the answer into a model report. Numerical confidence values, segmentation statistics, thresholds, routing details, and other internal evidence should only be mentioned when they are relevant to what the user asked.
+
+Integrate useful specialist findings naturally into the answer rather than listing evidence fields. The level of detail, focus, and style of the response should follow the user's request.
+
+Treat specialist predictions as uncertain supporting evidence rather than confirmed ground truth, and avoid overstating medical conclusions.
 
 User request:
 {user_text}
