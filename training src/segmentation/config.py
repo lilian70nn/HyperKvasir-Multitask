@@ -1,17 +1,28 @@
 from pathlib import Path
 import torch
 
+
+OUTPUT_DIR = Path("/kaggle/working/frozen_dino_siglip2_polyp_segmentation")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 DATA_ROOT = Path("/kaggle/input/datasets/kelkalot/the-hyper-kvasir-dataset")
 SEG_ROOT = DATA_ROOT / "segmented-images"
 IMAGE_DIR = SEG_ROOT / "images"
 MASK_DIR = SEG_ROOT / "masks"
 
-DINO_CKPT_PATH = Path("/kaggle/input/notebooks/lilyii70/dinov2-style-siglip/siglip2_dino_style_unlabeled_full/siglip2_dino_style_epoch3.pt")
-DINO_STATE_KEY = "student_state_dict"
+CLASSIFIER_CKPT_PATH = Path(OUTPUT_DIR / "hierarchical_classifier.pt")
+classifier_ckpt = torch.load(
+    CLASSIFIER_CKPT_PATH,
+    map_location="cpu",
+    weights_only=False,
+)
+ENCODER_INFO = classifier_ckpt["encoder"]
+
+MODEL_NAME = ENCODER_INFO["model_name"]
+DINO_CKPT_PATH = Path(ENCODER_INFO["checkpoint_path"])
+DINO_STATE_KEY = ENCODER_INFO["checkpoint_state_key"]
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-
-MODEL_NAME = "google/siglip2-base-patch16-224"
 
 TRAIN_RATIO = 0.80
 
@@ -38,5 +49,3 @@ USE_AUGMENTATION = True
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-OUTPUT_DIR = Path("/kaggle/working/frozen_dino_siglip2_polyp_segmentation")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

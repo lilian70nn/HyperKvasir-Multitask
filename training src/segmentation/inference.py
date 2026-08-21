@@ -30,13 +30,15 @@ def load_trained_segmentation_model(
         weights_only=False,
     )
 
+    encoder_info = segmentation_ckpt["encoder"]
+
     if dino_checkpoint is None:
-        dino_checkpoint = segmentation_ckpt["dino_checkpoint_path"]
+        dino_checkpoint = encoder_info["checkpoint_path"]
 
     model = FrozenDinoSigLIP2SegmentationModel(
-        model_name=segmentation_ckpt["model_name"],
+        model_name=encoder_info["model_name"],
         dino_checkpoint_path=dino_checkpoint,
-        state_key=segmentation_ckpt["dino_state_key"],
+        state_key=encoder_info["checkpoint_state_key"],
         decoder_channels=segmentation_ckpt["decoder_channels"],
         dropout=segmentation_ckpt["dropout"],
     )

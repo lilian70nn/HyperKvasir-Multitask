@@ -500,21 +500,3 @@ def run_encoder_selection():
 
 
 
-
-
-if __name__ == "__main__":
-    results = run_encoder_selection()
-
-    selection_info = {
-        "leaf_classes": results["leaf_classes"],
-        "best_dino_ckpt_path": (
-            None
-            if results["best_dino_ckpt_path"] is None
-            else str(results["best_dino_ckpt_path"])
-        ),
-        "merge_groups": results["merge_groups"],
-        "leaf_to_coarse": results["leaf_to_coarse"],
-    }
-
-    with open(ENCODER_SELECTION_DIR / "selection_results.json", "w") as f:
-        json.dump(selection_info, f, indent=2)

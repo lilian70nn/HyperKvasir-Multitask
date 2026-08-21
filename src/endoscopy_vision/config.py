@@ -1,6 +1,6 @@
 HF_REPO_ID = "Lian70/HyperKvasir-Multitask"
 
-ENCODER_FILENAME = "siglip2_dino_style_best.pt"
+ENCODER_FILENAME = "siglip2_dino_style_epoch2.pt"
 CLASSIFIER_FILENAME = "hierarchical_classifier.pt"
 SEGMENTATION_FILENAME = "segmentation_head.pt"
 

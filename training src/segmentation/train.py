@@ -258,10 +258,15 @@ def train_segmentation_model(model, train_loader, val_loader, val_dataset):
 
             torch.save(
                 {
-                    "model_name": MODEL_NAME,
-                    "dino_checkpoint_path": str(DINO_CKPT_PATH),
-                    "dino_state_key": DINO_STATE_KEY,
-                    "encoder_frozen": True,
+                    "encoder": {
+                        "model_name": ENCODER_INFO["model_name"],
+                        "checkpoint_path": ENCODER_INFO["checkpoint_path"],
+                        "checkpoint_state_key": ENCODER_INFO["checkpoint_state_key"],
+                        "dino_epoch": ENCODER_INFO["dino_epoch"],
+                        "ssl_train_loss": ENCODER_INFO["ssl_train_loss"],
+                        "frozen": True,
+                    },
+                
                     "image_size": IMAGE_SIZE,
                     "patch_size": PATCH_SIZE,
                     "decoder_channels": DECODER_CHANNELS,
@@ -269,10 +274,12 @@ def train_segmentation_model(model, train_loader, val_loader, val_dataset):
                     "mask_threshold": MASK_THRESHOLD,
                     "best_epoch": best_epoch,
                     "best_val_dice": best_dice,
+                
                     "decoder_state_dict": {
                         k: v.detach().cpu().clone()
                         for k, v in model.decoder.state_dict().items()
                     },
+                
                     "history": history.copy(),
                 },
                 best_checkpoint_path,
